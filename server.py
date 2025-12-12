@@ -1,6 +1,45 @@
 from flask import Flask, request, jsonify, render_template
 import psycopg2
 from datetime import datetime
+import cv2
+from deepface import DeepFace
+import os
+from datetime import datetime
+
+def run_face_attendance(cur, conn):
+    db_path = "static/students"
+    cap = cv2.VideoCapture(0)  # use default webcam
+
+    detected_usns = set()
+    SCAN_FRAMES = 10
+
+    for _ in range(SCAN_FRAMES):
+        ret, frame = cap.read()
+        if not ret:
+            continue
+
+        try:
+            result = DeepFace.find(img_path=frame, db_path=db_path, enforce_detection=False, distance_metric="cosine")
+            if len(result) > 0 and not result[0].empty:
+                matched_file = result[0].iloc[0]['identity']
+                usn = os.path.basename(matched_file).split('.')[0]
+                detected_usns.add(usn)
+        except:
+            pass
+
+    cap.release()
+
+    # Insert detected attendance into DB
+    for usn in detected_usns:
+        cur.execute(
+            "INSERT INTO attendance (student_id, timestamp, method) "
+            "SELECT id, %s, 'Face' FROM students WHERE rfid_uid=%s",
+            (datetime.now(), usn)
+        )
+    conn.commit()
+    return list(detected_usns)
+
+
 
 app = Flask(__name__)
 
@@ -124,10 +163,12 @@ def dashboard():
 # ------------------ Face Attendance Endpoint ------------------
 @app.route('/take_attendance', methods=['POST'])
 def take_face_attendance():
-    # Placeholder: Trigger your DeepFace code here
-    # Example: Run facial recognition and insert attendance
-    return jsonify({"status": "success"})
+    detected = run_face_attendance(cur, conn)
+    return jsonify({"status": "success", "detected": detected})
+
+
 
 # ------------------ Main ------------------
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
+
