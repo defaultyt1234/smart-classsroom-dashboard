@@ -5,9 +5,17 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h2>Attendance Records</h2>
+    <h2>Attendance Dashboard</h2>
+
+    <!-- Sensor Cards -->
+    <div class="sensor-card">Temperature: <span id="temperature">--</span></div>
+    <div class="sensor-card">Light Level: <span id="light">--</span></div>
+    <div class="sensor-card">Light Status: <span id="light-status">--</span></div>
+
+    <!-- Take Attendance Button -->
     <button onclick="takeAttendance()">Take Attendance</button>
-    
+
+    <!-- Attendance Table -->
     <table>
         <tr>
             <th>Name</th>
