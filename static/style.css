@@ -1,57 +1,49 @@
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f8f9fa;
-    margin: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
 }
 
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.sensor-card {
-    display: inline-block;
-    width: 200px;
-    padding: 15px;
-    margin: 10px;
-    border-radius: 10px;
-    background-color: #007bff;
-    color: white;
-    text-align: center;
-    font-weight: bold;
-}
-
-table {
-    border-collapse: collapse;
+.container {
     width: 90%;
     margin: 20px auto;
-    background-color: white;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
 }
 
-th, td {
-    border: 1px solid #dee2e6;
-    padding: 12px;
+h1, h2 {
     text-align: center;
 }
 
-th {
-    background-color: #343a40;
-    color: white;
+.sensor-section, .attendance-section, .table-section {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #ccc;
 }
 
 button {
     display: block;
-    margin: 10px auto;
-    padding: 10px 25px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
+    margin: 0 auto;
+    padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
 }
 
-button:hover {
-    background-color: #218838;
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
 }
