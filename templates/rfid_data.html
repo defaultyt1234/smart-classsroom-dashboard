@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RFID Scans</title>
+</head>
+<body>
+
+<h2>RFID Scan Data</h2>
+
+<table border="1" cellpadding="10">
+    <tr>
+        <th>UID</th>
+        <th>Scan Time</th>
+    </tr>
+
+    {% for row in data %}
+    <tr>
+        <td>{{ row.uid }}</td>
+        <td>{{ row.time }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
