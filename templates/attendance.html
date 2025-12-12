@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Log</title>
+</head>
+<body>
+    <h2>Facial Recognition Attendance</h2>
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>USN</th>
+            <th>Status</th>
+            <th>Time</th>
+        </tr>
+
+        {% for row in data %}
+        <tr>
+            <td>{{ row.usn }}</td>
+            <td>{{ row.status }}</td>
+            <td>{{ row.time }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
