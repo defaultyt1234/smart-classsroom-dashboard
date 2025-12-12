@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Attendance Log</title>
+    <title>Attendance Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h2>Facial Recognition Attendance</h2>
-    <table border="1" cellpadding="10">
+    <h2>Attendance Records</h2>
+    <button onclick="takeAttendance()">Take Attendance</button>
+    
+    <table>
         <tr>
-            <th>USN</th>
-            <th>Status</th>
-            <th>Time</th>
+            <th>Name</th>
+            <th>Timestamp</th>
+            <th>Method</th>
         </tr>
-
-        {% for row in data %}
+        {% for row in attendance %}
         <tr>
-            <td>{{ row.usn }}</td>
-            <td>{{ row.status }}</td>
-            <td>{{ row.time }}</td>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
         </tr>
         {% endfor %}
     </table>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
