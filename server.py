@@ -1,78 +1,43 @@
 from flask import Flask, request, jsonify, render_template
+import psycopg2
 from datetime import datetime
 
 app = Flask(__name__)
 
-# In-memory storage (you can replace with MongoDB/MySQL later)
-rfid_scans = []        # {uid, time}
-attendance_log = []    # {usn, status, time}
+# --- Database Connection ---
+conn = psycopg2.connect(
+    dbname="attendance_db",
+    user="youruser",
+    password="yourpassword",
+    host="yourhost"
+)
+cur = conn.cursor()
 
-# UID → USN mapping
-uid_map = {
-    "123456": "1RN24CS001",
-    "654321": "1RN24CS002",
-    "111111": "1RN24CS295"
-}
+# --- API to receive ESP32 data ---
+@app.route('/attendance', methods=['POST'])
+def mark_attendance():
+    data = request.get_json()
+    uid = data['uid']
+    temp = data['temperature']
+    light = data['light']
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+    cur.execute("INSERT INTO sensor_data (temperature, light_level) VALUES (%s,%s)", (temp, light))
 
-# ========== RFID API ===========
-@app.route("/rfid", methods=["POST"])
-def rfid():
-    data = request.json
-    uid = data.get("uid")
+    cur.execute("SELECT id FROM students WHERE rfid_uid=%s", (uid,))
+    student = cur.fetchone()
+    if student:
+        student_id = student[0]
+        cur.execute("INSERT INTO attendance (student_id, timestamp, method) VALUES (%s,%s,'RFID')",
+                    (student_id, datetime.now()))
+    conn.commit()
+    return jsonify({"status": "success"}), 200
 
-    rfid_scans.append({
-        "uid": uid,
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    })
-
-    return jsonify({"message": "RFID recorded", "uid": uid}), 200
-
-
-@app.route("/list")
-def list_uids():
-    return jsonify(rfid_scans)
-
-
-@app.route("/map")
-def get_map():
-    return jsonify(uid_map)
-
-
-# ========== Attendance from Facial Recognition ===========
-@app.route("/api/attendance", methods=["POST"])
-def attendance():
-    data = request.json
-    usn = data.get("usn")
-    status = data.get("status")
-
-    attendance_log.append({
-        "usn": usn,
-        "status": status,
-        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    })
-
-    return jsonify({"message": "Saved"}), 200
-
-
-@app.route("/attendance_log")
-def view_log():
-    return jsonify(attendance_log)
-
-
-# ========== Faculty Dashboard ===========
-@app.route("/attendance")
-def attendance_page():
-    return render_template("attendance.html", data=attendance_log)
-
-
-@app.route("/rfid_data")
-def rfid_data():
-    return render_template("rfid_data.html", data=rfid_scans)
-
+# --- Dashboard ---
+@app.route('/')
+def dashboard():
+    cur.execute("SELECT s.name, a.timestamp, a.method FROM attendance a JOIN students s ON a.student_id = s.id ORDER BY a.timestamp DESC")
+    records = cur.fetchall()
+    return render_template('dashboard.html', attendance=records)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host='0.0.0.0', port=5000)
