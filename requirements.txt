@@ -1,7 +1,6 @@
-Flask
-psycopg2-binary
-flask-cors
+tensorflow==2.19.1
 deepface
 opencv-python
 numpy
-tensorflow
+flask
+psycopg2-binary
