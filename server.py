@@ -1,89 +1,78 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import time
+from flask import Flask, request, jsonify, render_template
+from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)
 
-# Stores scanned UIDs from ESP32
-scanned = []
+# In-memory storage (you can replace with MongoDB/MySQL later)
+rfid_scans = []        # {uid, time}
+attendance_log = []    # {usn, status, time}
 
-# Mapping UID -> USN (edit as needed)
-uid_to_usn = {
-    "123ABC": "1RN24CS295",
-    "456DEF": "1RN24CS244"
+# UID → USN mapping
+uid_map = {
+    "123456": "1RN24CS001",
+    "654321": "1RN24CS002",
+    "111111": "1RN24CS295"
 }
-
-# Attendance log storage
-attendance_log = []
-
 
 @app.route("/")
 def home():
-    return "Smart Attendance Server Running"
+    return render_template("index.html")
 
-
-# ------------------------------
-# 1) ESP32 posts UID here
-# ------------------------------
-@app.route("/api/nfc_event", methods=["POST"])
-def nfc_event():
+# ========== RFID API ===========
+@app.route("/rfid", methods=["POST"])
+def rfid():
     data = request.json
     uid = data.get("uid")
-    ts = time.time()
 
-    scanned.append({"uid": uid, "ts": ts})
-    print("Received UID:", uid)
+    rfid_scans.append({
+        "uid": uid,
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
 
-    return jsonify({"status": "ok", "received_uid": uid})
-
-
-# ------------------------------
-# 2) Retrieve all scanned UIDs
-# ------------------------------
-@app.route("/list", methods=["GET"])
-def list_scanned():
-    return jsonify(scanned)
+    return jsonify({"message": "RFID recorded", "uid": uid}), 200
 
 
-# ------------------------------
-# 3) UID → USN mapping
-# ------------------------------
-@app.route("/map", methods=["GET"])
-def map_get():
-    return jsonify(uid_to_usn)
+@app.route("/list")
+def list_uids():
+    return jsonify(rfid_scans)
 
 
-# ------------------------------
-# 4) Face recognition sends attendance result
-# ------------------------------
+@app.route("/map")
+def get_map():
+    return jsonify(uid_map)
+
+
+# ========== Attendance from Facial Recognition ===========
 @app.route("/api/attendance", methods=["POST"])
-def post_attendance():
+def attendance():
     data = request.json
     usn = data.get("usn")
     status = data.get("status")
-    ts = time.time()
 
     attendance_log.append({
         "usn": usn,
         "status": status,
-        "timestamp": ts
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
 
-    print("Attendance updated:", usn, " → ", status)
-    return jsonify({"status": "stored"})
+    return jsonify({"message": "Saved"}), 200
 
 
-# ------------------------------
-# 5) Retrieve attendance log
-# ------------------------------
-@app.route("/attendance_log", methods=["GET"])
-def get_attendance_log():
+@app.route("/attendance_log")
+def view_log():
     return jsonify(attendance_log)
 
 
-# ------------------------------
-# RUN SERVER (Render uses Gunicorn)
-# ------------------------------
+# ========== Faculty Dashboard ===========
+@app.route("/attendance")
+def attendance_page():
+    return render_template("attendance.html", data=attendance_log)
+
+
+@app.route("/rfid_data")
+def rfid_data():
+    return render_template("rfid_data.html", data=rfid_scans)
+
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=5000)
