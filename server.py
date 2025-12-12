@@ -7,9 +7,9 @@ app = Flask(__name__)
 # ------------------ Database Connection ------------------
 conn = psycopg2.connect(
     dbname="attendance_db",   # your DB name
-    user="youruser",          # your DB user
-    password="yourpassword",  # your DB password
-    host="yourhost"           # your DB host (from Render)
+    user="attendance_db_cfay_user",          # your DB user
+    password="ZHJLQyejo3kni7HdezxvakMi881BrKFq",  # your DB password
+    host="dpg-d4u6niqdbo4c7389oqe0-a"           # your DB host (from Render)
 )
 cur = conn.cursor()
 
@@ -84,3 +84,4 @@ def take_face_attendance():
 # ------------------ Main ------------------
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
+
