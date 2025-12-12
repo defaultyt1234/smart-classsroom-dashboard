@@ -1,36 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Attendance Dashboard</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
 </head>
 <body>
-    <h2>Attendance Dashboard</h2>
+    <div class="container">
+        <h1>Attendance Dashboard</h1>
 
-    <!-- Sensor Cards -->
-    <div class="sensor-card">Temperature: <span id="temperature">--</span></div>
-    <div class="sensor-card">Light Level: <span id="light">--</span></div>
-    <div class="sensor-card">Light Status: <span id="light-status">--</span></div>
+        <!-- Latest Sensor Data -->
+        <div class="sensor-section">
+            <h2>Room Sensors</h2>
+            <p>Temperature: <span id="temp">--</span> °C</p>
+            <p>Light Level: <span id="light">--</span></p>
+            <p>Last Updated: <span id="sensor-time">--</span></p>
+        </div>
 
-    <!-- Take Attendance Button -->
-    <button onclick="takeAttendance()">Take Attendance</button>
+        <!-- Take Attendance Button -->
+        <div class="attendance-section">
+            <button id="take-attendance">Take Face Attendance</button>
+        </div>
 
-    <!-- Attendance Table -->
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Timestamp</th>
-            <th>Method</th>
-        </tr>
-        {% for row in attendance %}
-        <tr>
-            <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        <!-- Attendance Table -->
+        <div class="table-section">
+            <h2>Attendance Records</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student Name</th>
+                        <th>RFID UID</th>
+                        <th>Timestamp</th>
+                        <th>Method</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in attendance %}
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                        <td>{{ row[3] }}</td>
+                        <td>{{ row[4] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </body>
 </html>
