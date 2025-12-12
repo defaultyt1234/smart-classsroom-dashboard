@@ -6,12 +6,58 @@ app = Flask(__name__)
 
 # ------------------ Database Connection ------------------
 conn = psycopg2.connect(
-    dbname="attendance_db",   # your DB name
-    user="attendance_db_cfay_user",          # your DB user
-    password="ZHJLQyejo3kni7HdezxvakMi881BrKFq",  # your DB password
-    host="dpg-d4u6niqdbo4c7389oqe0-a"           # your DB host (from Render)
+    dbname="attendance_db",  
+    user="attendance_db_cfay_user",          
+    password="ZHJLQyejo3kni7HdezxvakMi881BrKFq",  
+    host="dpg-d4u6niqdbo4c7389oqe0-a.render.com",  
+    port=5432
 )
 cur = conn.cursor()
+
+# ------------------ Create Tables (run once at startup) ------------------
+cur.execute("""
+CREATE TABLE IF NOT EXISTS students (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    rfid_uid VARCHAR(50) UNIQUE,
+    face_encoding TEXT
+)
+""")
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS attendance (
+    id SERIAL PRIMARY KEY,
+    student_id INT REFERENCES students(id),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    method VARCHAR(10)
+)
+""")
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS sensor_data (
+    id SERIAL PRIMARY KEY,
+    temperature FLOAT,
+    light_level INT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+
+conn.commit()
+
+# ------------------ Insert Sample Students (Optional) ------------------
+sample_students = [
+    ("Shrikanth ", "1RN24CS244"),
+    ("Vinodkumar", "1RN24CS296")
+]
+
+for name, rfid in sample_students:
+    cur.execute("""
+        INSERT INTO students (name, rfid_uid) 
+        VALUES (%s, %s) 
+        ON CONFLICT (rfid_uid) DO NOTHING
+    """, (name, rfid))
+
+conn.commit()
 
 # ------------------ API to Receive ESP32 Data ------------------
 @app.route('/attendance', methods=['POST'])
@@ -65,8 +111,9 @@ def get_sensor_data():
 # ------------------ Dashboard ------------------
 @app.route('/')
 def dashboard():
+    # Fetch all attendance records
     cur.execute("""
-        SELECT s.name, a.timestamp, a.method
+        SELECT a.id, s.name, s.rfid_uid, a.timestamp, a.method 
         FROM attendance a
         JOIN students s ON a.student_id = s.id
         ORDER BY a.timestamp DESC
@@ -84,5 +131,3 @@ def take_face_attendance():
 # ------------------ Main ------------------
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
-
-
