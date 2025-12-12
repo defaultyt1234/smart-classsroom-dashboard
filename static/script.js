@@ -1,30 +1,29 @@
-// Trigger face recognition attendance
-function takeAttendance() {
-    fetch('/take_attendance', { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            alert('Attendance Updated!');
-            location.reload(); // Reload to show new records
-        })
-        .catch(error => console.error('Error:', error));
+// Fetch latest sensor data every 5 seconds
+async function fetchSensorData() {
+    try {
+        const response = await fetch('/sensors');
+        const data = await response.json();
+        document.getElementById('temp').textContent = data.temperature;
+        document.getElementById('light').textContent = data.light_level;
+        document.getElementById('sensor-time').textContent = data.timestamp;
+    } catch (err) {
+        console.error("Error fetching sensor data:", err);
+    }
 }
 
-// Auto-refresh sensor data every 10 seconds
-function refreshSensors() {
-    fetch('/sensors')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('temperature').innerText = data.temperature + " °C";
-            document.getElementById('light').innerText = data.light_level;
-            if (data.light_level < 1000) {
-                document.getElementById('light-status').innerText = "ON";
-            } else {
-                document.getElementById('light-status').innerText = "OFF";
-            }
-        })
-        .catch(err => console.error(err));
-}
+// Take face attendance when button clicked
+document.getElementById('take-attendance').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/take_attendance', { method: 'POST' });
+        const data = await response.json();
+        alert("Face Attendance Triggered: " + data.status);
+        // Optionally reload dashboard to show new attendance
+        location.reload();
+    } catch (err) {
+        console.error("Error taking attendance:", err);
+    }
+});
 
-// Refresh sensors immediately and then every 10s
-refreshSensors();
-setInterval(refreshSensors, 10000);
+// Start fetching sensor data
+setInterval(fetchSensorData, 5000);
+fetchSensorData(); // initial fetch
