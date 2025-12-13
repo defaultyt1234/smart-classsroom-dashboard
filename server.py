@@ -6,9 +6,14 @@ from datetime import datetime
 app = Flask(__name__)
 
 # ================= DATABASE =================
-DATABASE_URL = os.environ.get("postgresql://attendance_db_cfay_user:ZHJLQyejo3kni7HdezxvakMi881BrKFq@dpg-d4u6niqdbo4c7389oqe0-a/attendance_db_cfay")
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL is None:
+    raise RuntimeError("DATABASE_URL not set")
+
 conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()
+
 
 # ================= TABLES =================
 cur.execute("""
@@ -130,3 +135,4 @@ def dashboard():
 # ================= MAIN =================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
