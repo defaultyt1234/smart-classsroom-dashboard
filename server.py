@@ -44,6 +44,7 @@ def run_face_attendance(cur, conn):
 app = Flask(__name__)
 
 # ------------------ Database Connection ------------------
+DATABASE_URL = os.environ.get("postgresql://attendance_db_cfay_user:ZHJLQyejo3kni7HdezxvakMi881BrKFq@dpg-d4u6niqdbo4c7389oqe0-a/attendance_db_cfay")
 conn = psycopg2.connect(
     dbname="attendance_db",  
     user="attendance_db_cfay_user",          
@@ -171,4 +172,5 @@ def take_face_attendance():
 # ------------------ Main ------------------
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
+
 
