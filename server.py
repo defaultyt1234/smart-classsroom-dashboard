@@ -62,27 +62,31 @@ conn.commit()
 # ================= ESP32 RFID + SENSOR =================
 @app.route("/attendance", methods=["POST"])
 def rfid_attendance():
-    data = request.json
-    uid = data["uid"]
-    temp = data["temperature"]
-    light = data["light"]
-
+    data = request.get_json()
+    uid = data.get("rfid_uid", "")
+    temp = data.get("temperature", None)
+    light = data.get("ldr", None)
+    
+    # Store sensor data
     cur.execute(
         "INSERT INTO sensor_data (temperature, light) VALUES (%s,%s)",
         (temp, light)
     )
-
+    
+    # Lookup student by RFID
     cur.execute("SELECT id FROM students WHERE rfid_uid=%s", (uid,))
     s = cur.fetchone()
-
     if s:
-        cur.execute("""
-            INSERT INTO attendance (student_id, method, status)
-            VALUES (%s,'RFID','present')
-        """, (s[0],))
+        cur.execute(
+            "INSERT INTO attendance (student_id, method, status) VALUES (%s,'RFID','present')",
+            (s[0],)
+        )
 
     conn.commit()
     return jsonify({"success": True})
+
+
+
 
 # ================= FACE ATTENDANCE (FROM COLAB) =================
 @app.route("/api/face_attendance", methods=["POST"])
@@ -135,4 +139,5 @@ def dashboard():
 # ================= MAIN =================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
 
