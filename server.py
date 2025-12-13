@@ -47,7 +47,7 @@ conn.commit()
 # ================= SAMPLE STUDENTS =================
 students = [
     ("Shrikanth", "1RN24CS244"),
-    ("Vinodkumar", "1RN24CS296")
+    ("Vinodkumar", "1RN24CS295")
 ]
 
 for s in students:
@@ -139,5 +139,6 @@ def dashboard():
 # ================= MAIN =================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+
 
 
